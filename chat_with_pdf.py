@@ -2,10 +2,12 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
+
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-import google.generativeai as genai
-from langchain.vectorstores import Pinecone as PC
 from langchain_google_genai import ChatGoogleGenerativeAI
+
+import google.generativeai as genai
+from langchain_community.vectorstores import Pinecone as PC
 
 from dotenv import load_dotenv
 
@@ -92,3 +94,4 @@ def show():
     
 
     showman(st.session_state["pdf_docs"])
+
