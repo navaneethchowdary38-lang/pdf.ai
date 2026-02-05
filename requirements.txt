@@ -5,4 +5,4 @@ langchain_community
 pinecone
 google.generativeai
 fpdf
-langchain.text_splitter
+
