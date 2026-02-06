@@ -7,3 +7,5 @@ langchain-text-splitters==0.0.1
 google-generativeai
 python-dotenv
 faiss-cpu
+sentence-transformers
+torch
