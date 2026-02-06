@@ -64,7 +64,7 @@ def showman():
 
     if user_question:
         # 🔥 Direct Gemini (NO LangChain, NO v1beta)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+       model = genai.GenerativeModel("gemini-1.0-pro")
 
         # 🔎 Retrieve relevant chunks
         docs = st.session_state["docsearch"].similarity_search(
@@ -119,3 +119,4 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
