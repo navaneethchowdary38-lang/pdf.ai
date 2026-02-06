@@ -1,11 +1,21 @@
 import streamlit as st
 
-st.set_page_config(page_title="Gemini_Student", page_icon="✏️")
+st.set_page_config(
+    page_title="Gemini_Student",
+    page_icon="✏️"
+)
 
 st.sidebar.title("Welcome to Gemini_Student")
+
 selection = st.sidebar.radio(
     "",
-    ["Chatbot", "Image_QA_Gemini", "QA_Gemini", "MCQ_Gen", "chat_with_pdf"]
+    [
+        "Chatbot",
+        "Image_QA_Gemini",
+        "QA_Gemini",
+        "MCQ_Gen",
+        "chat_with_pdf",
+    ],
 )
 
 if selection == "Chatbot":
