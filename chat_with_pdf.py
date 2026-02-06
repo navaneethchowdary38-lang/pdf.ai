@@ -2,6 +2,7 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
+from langchain.chains import RetrievalQA
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -98,3 +99,4 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
