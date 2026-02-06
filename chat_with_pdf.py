@@ -35,13 +35,13 @@ def get_pdf_text(pdf_docs):
 
 def get_text_chunks(text):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=400,      # ⬅ smaller = faster + safer
+        chunk_size=400,
         chunk_overlap=80
     )
     return splitter.split_text(text)
 
 
-# ✅ CACHE THE VECTOR STORE (CRITICAL FIX)
+# -------------------- VECTOR STORE --------------------
 @st.cache_resource(show_spinner=False)
 def build_vector_store(text_chunks):
     embeddings = HuggingFaceEmbeddings(
@@ -60,16 +60,13 @@ def showman():
     )
 
     if user_question:
-       llm = ChatGoogleGenerativeAI(
-    model="models/gemini-pro",
-    temperature=0.2,
-    max_output_tokens=512,
-    timeout=30
-)
+        llm = ChatGoogleGenerativeAI(
+            model="models/gemini-pro",
+            temperature=0.2,
+            max_output_tokens=512,
+            timeout=30
+        )
 
-
-
-        # ✅ LIMIT RETRIEVAL (MAJOR SPEED BOOST)
         retriever = st.session_state["docsearch"].as_retriever(
             search_kwargs={"k": 2}
         )
@@ -102,13 +99,9 @@ def show():
             with st.spinner("Processing PDFs..."):
                 raw_text = get_pdf_text(pdf_docs)
                 chunks = get_text_chunks(raw_text)
-
-                # ✅ BUILDS ONLY ONCE (NO REPEAT COST)
                 st.session_state["docsearch"] = build_vector_store(chunks)
 
             st.success("PDFs processed successfully!")
 
     if "docsearch" in st.session_state:
         showman()
-
-
