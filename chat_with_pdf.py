@@ -46,8 +46,9 @@ chunk_overlap=100
 def get_vector_store(text_chunks):
     try:
         embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001"
-        )
+    model="models/text-embedding-004"
+)
+
         vectorstore = FAISS.from_texts(
             text_chunks,
             embedding=embeddings
@@ -103,5 +104,6 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
 
 
