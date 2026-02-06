@@ -8,4 +8,4 @@ google-generativeai
 python-dotenv
 faiss-cpu
 sentence-transformers
-torch==2.2.2
+torch
