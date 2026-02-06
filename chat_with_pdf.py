@@ -61,9 +61,12 @@ def showman():
 
     if user_question:
         llm = ChatGoogleGenerativeAI(
-            model="models/gemini-1.5-flash",  # ⚡ fast
-            temperature=0.2
-        )
+    model="models/gemini-1.5-flash-001",
+    temperature=0.2,
+    max_output_tokens=512,
+    timeout=30
+)
+
 
         # ✅ LIMIT RETRIEVAL (MAJOR SPEED BOOST)
         retriever = st.session_state["docsearch"].as_retriever(
@@ -106,3 +109,4 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
