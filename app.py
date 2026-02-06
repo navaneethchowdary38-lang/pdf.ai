@@ -9,13 +9,7 @@ st.sidebar.title("Welcome to Gemini_Student")
 
 selection = st.sidebar.radio(
     "",
-    [
-        "Chatbot",
-        "Image_QA_Gemini",
-        "QA_Gemini",
-        "MCQ_Gen",
-        "chat_with_pdf",
-    ],
+    ["Chatbot", "Image_QA_Gemini", "QA_Gemini", "MCQ_Gen", "chat_with_pdf"]
 )
 
 if selection == "Chatbot":
@@ -35,5 +29,5 @@ elif selection == "MCQ_Gen":
     MCQ_Gen.show()
 
 elif selection == "chat_with_pdf":
-    import chat_with_pdf
+    import chat_with_pdf   # ✅ CORRECT NAME
     chat_with_pdf.show()
