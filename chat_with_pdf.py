@@ -2,7 +2,6 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
-from langchain.chains import RetrievalQA
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -33,37 +32,25 @@ def get_pdf_text(pdf_docs):
                 text += page_text
     return text
 
-llm = ChatGoogleGenerativeAI(
-    model="models/gemini-1.5-pro-latest",
-    temperature=0.7
-)
 
 def get_text_chunks(text):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-chunk_overlap=100
-
+        chunk_size=400,      # ⬅ smaller = faster + safer
+        chunk_overlap=80
     )
     return splitter.split_text(text)
 
 
-def get_vector_store(text_chunks):
-    try:
-        embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-        )
-        vectorstore = FAISS.from_texts(
-            text_chunks,
-            embedding=embeddings
-        )
-        return vectorstore
-    except Exception as e:
-        st.error(f"Embedding failed: {e}")
-        st.stop()
+# ✅ CACHE THE VECTOR STORE (CRITICAL FIX)
+@st.cache_resource(show_spinner=False)
+def build_vector_store(text_chunks):
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
+    return FAISS.from_texts(text_chunks, embedding=embeddings)
 
 
-
-
+# -------------------- CHAT UI --------------------
 def showman():
     st.header("📄 Chat with PDF")
 
@@ -74,18 +61,25 @@ def showman():
 
     if user_question:
         llm = ChatGoogleGenerativeAI(
-    model="models/gemini-1.5-flash",
-    temperature=0.3
-)
+            model="models/gemini-1.5-flash",  # ⚡ fast
+            temperature=0.2
+        )
 
+        # ✅ LIMIT RETRIEVAL (MAJOR SPEED BOOST)
+        retriever = st.session_state["docsearch"].as_retriever(
+            search_kwargs={"k": 2}
+        )
 
         qa = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
-            retriever=st.session_state["docsearch"].as_retriever()
+            retriever=retriever,
+            return_source_documents=False
         )
 
-        response = qa.invoke(user_question)
+        with st.spinner("Thinking..."):
+            response = qa.invoke(user_question)
+
         st.write("### Answer")
         st.write(response["result"])
 
@@ -104,13 +98,11 @@ def show():
             with st.spinner("Processing PDFs..."):
                 raw_text = get_pdf_text(pdf_docs)
                 chunks = get_text_chunks(raw_text)
-                st.session_state["docsearch"] = get_vector_store(chunks)
+
+                # ✅ BUILDS ONLY ONCE (NO REPEAT COST)
+                st.session_state["docsearch"] = build_vector_store(chunks)
+
             st.success("PDFs processed successfully!")
 
     if "docsearch" in st.session_state:
         showman()
-
-
-
-
-
