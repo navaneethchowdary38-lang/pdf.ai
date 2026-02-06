@@ -7,27 +7,33 @@ st.set_page_config(
 
 st.sidebar.title("Welcome to Gemini_Student")
 
-selection = st.sidebar.radio(
-    "",
-    ["Chatbot", "Image_QA_Gemini", "QA_Gemini", "MCQ_Gen", "chat_with_pdf"]
+choice = st.sidebar.radio(
+    "Select Module",
+    (
+        "Chatbot",
+        "Image_QA_Gemini",
+        "QA_Gemini",
+        "MCQ_Gen",
+        "chat_with_pdf",
+    ),
 )
 
-if selection == "Chatbot":
+if choice == "Chatbot":
     import Chatbot
     Chatbot.show()
 
-elif selection == "Image_QA_Gemini":
+elif choice == "Image_QA_Gemini":
     import Image_QA_Gemini
     Image_QA_Gemini.show()
 
-elif selection == "QA_Gemini":
+elif choice == "QA_Gemini":
     import QA_Gemini
     QA_Gemini.show()
 
-elif selection == "MCQ_Gen":
+elif choice == "MCQ_Gen":
     import MCQ_Gen
     MCQ_Gen.show()
 
-elif selection == "chat_with_pdf":
-    import chat_with_pdf   # ✅ CORRECT NAME
+elif choice == "chat_with_pdf":
+    import chat_with_pdf
     chat_with_pdf.show()
