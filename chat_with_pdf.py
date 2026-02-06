@@ -4,7 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 from langchain.chains import RetrievalQA
 
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
@@ -33,6 +33,10 @@ def get_pdf_text(pdf_docs):
                 text += page_text
     return text
 
+llm = ChatGoogleGenerativeAI(
+    model="models/gemini-1.5-pro-latest",
+    temperature=0.7
+)
 
 def get_text_chunks(text):
     splitter = RecursiveCharacterTextSplitter(
@@ -45,10 +49,9 @@ chunk_overlap=100
 
 def get_vector_store(text_chunks):
     try:
-        embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/text-embedding-004"
-)
-
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        )
         vectorstore = FAISS.from_texts(
             text_chunks,
             embedding=embeddings
@@ -57,6 +60,7 @@ def get_vector_store(text_chunks):
     except Exception as e:
         st.error(f"Embedding failed: {e}")
         st.stop()
+
 
 
 
@@ -104,6 +108,7 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
 
 
 
