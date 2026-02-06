@@ -63,11 +63,9 @@ def showman():
     )
 
     if user_question:
-        # 🔥 Direct Gemini (NO LangChain, NO v1beta)
+        # ✅ CORRECT MODEL ID
         model = genai.GenerativeModel("models/gemini-1.0-pro")
 
-
-        # 🔎 Retrieve relevant chunks
         docs = st.session_state["docsearch"].similarity_search(
             user_question,
             k=2
@@ -76,8 +74,7 @@ def showman():
         context = "\n\n".join(doc.page_content for doc in docs)
 
         prompt = f"""
-You are a helpful assistant.
-Answer the question ONLY using the context below.
+Answer the question using ONLY the context below.
 If the answer is not present, say "Not found in the document".
 
 Context:
@@ -100,6 +97,7 @@ Question:
         st.write(response.text)
 
 
+
 # -------------------- MAIN APP --------------------
 def show():
     with st.sidebar:
@@ -120,4 +118,5 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
 
