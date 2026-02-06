@@ -4,9 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -22,11 +20,16 @@ if not GOOGLE_API_KEY:
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # -------------------- PDF FUNCTIONS --------------------
-def get_pdf_text(pdf_docs):
+def get_pdf_text(pdf_docs, max_pages=10):
+    """
+    Read text from PDFs (limit pages for speed)
+    """
     text = ""
     for pdf in pdf_docs:
         reader = PdfReader(pdf)
-        for page in reader.pages:
+        for i, page in enumerate(reader.pages):
+            if i >= max_pages:
+                break
             page_text = page.extract_text()
             if page_text:
                 text += page_text
@@ -43,11 +46,11 @@ def get_text_chunks(text):
 
 # -------------------- VECTOR STORE --------------------
 @st.cache_resource(show_spinner=False)
-def build_vector_store(text_chunks):
+def build_vector_store(chunks):
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name="sentence-transformers/paraphrase-MiniLM-L3-v2"  # ⚡ FAST
     )
-    return FAISS.from_texts(text_chunks, embedding=embeddings)
+    return FAISS.from_texts(chunks, embedding=embeddings)
 
 
 # -------------------- CHAT UI --------------------
@@ -60,29 +63,40 @@ def showman():
     )
 
     if user_question:
-        llm = ChatGoogleGenerativeAI(
-            model="models/gemini-pro",
-            temperature=0.2,
-            max_output_tokens=512,
-            timeout=30
+        # 🔥 Direct Gemini (NO LangChain, NO v1beta)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+
+        # 🔎 Retrieve relevant chunks
+        docs = st.session_state["docsearch"].similarity_search(
+            user_question,
+            k=2
         )
 
-        retriever = st.session_state["docsearch"].as_retriever(
-            search_kwargs={"k": 2}
-        )
+        context = "\n\n".join(doc.page_content for doc in docs)
 
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            return_source_documents=False
-        )
+        prompt = f"""
+You are a helpful assistant.
+Answer the question ONLY using the context below.
+If the answer is not present, say "Not found in the document".
+
+Context:
+{context}
+
+Question:
+{user_question}
+"""
 
         with st.spinner("Thinking..."):
-            response = qa.invoke(user_question)
+            response = model.generate_content(
+                prompt,
+                generation_config={
+                    "temperature": 0.2,
+                    "max_output_tokens": 512
+                }
+            )
 
         st.write("### Answer")
-        st.write(response["result"])
+        st.write(response.text)
 
 
 # -------------------- MAIN APP --------------------
@@ -97,7 +111,7 @@ def show():
 
         if pdf_docs and st.button("Submit & Process"):
             with st.spinner("Processing PDFs..."):
-                raw_text = get_pdf_text(pdf_docs)
+                raw_text = get_pdf_text(pdf_docs, max_pages=10)
                 chunks = get_text_chunks(raw_text)
                 st.session_state["docsearch"] = build_vector_store(chunks)
 
