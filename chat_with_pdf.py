@@ -36,23 +36,27 @@ def get_pdf_text(pdf_docs):
 
 def get_text_chunks(text):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
+        chunk_size=500,
+chunk_overlap=100
+
     )
     return splitter.split_text(text)
 
 
 def get_vector_store(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001"
-    )
-    vectorstore = FAISS.from_texts(text_chunks, embedding=embeddings)
-    return vectorstore
+    try:
+        embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/embedding-001"
+        )
+        vectorstore = FAISS.from_texts(
+            text_chunks,
+            embedding=embeddings
+        )
+        return vectorstore
+    except Exception as e:
+        st.error(f"Embedding failed: {e}")
+        st.stop()
 
-# -------------------- CHAT UI --------------------
-def clear_text():
-    st.session_state["user_question"] = ""
-    st.session_state["response"] = ""
 
 
 def showman():
@@ -99,4 +103,5 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
 
