@@ -74,9 +74,10 @@ def showman():
 
     if user_question:
         llm = ChatGoogleGenerativeAI(
-            model="models/gemini-1.5-pro-latest",
-            temperature=0.7
-        )
+    model="models/gemini-1.5-flash",
+    temperature=0.3
+)
+
 
         qa = RetrievalQA.from_chain_type(
             llm=llm,
@@ -108,6 +109,7 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
 
 
 
