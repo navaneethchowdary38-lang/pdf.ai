@@ -64,7 +64,7 @@ def showman():
 
     if user_question:
         # ✅ CORRECT MODEL ID
-        model = genai.GenerativeModel("models/gemini-1.0-pro")
+        model = genai.GenerativeModel("models/gemini-1.0-lite")
 
         docs = st.session_state["docsearch"].similarity_search(
             user_question,
@@ -118,5 +118,6 @@ def show():
 
     if "docsearch" in st.session_state:
         showman()
+
 
 
